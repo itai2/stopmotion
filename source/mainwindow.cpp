@@ -1,5 +1,4 @@
 #include "mainwindow.h"
-#include "selectresolution.h"
 #include "ui_mainwindow.h"
 
 #include <QCameraInfo>
@@ -30,14 +29,11 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-void MainWindow::on_action_SelectResolution_triggered()
+void MainWindow::setResolution( QSize res )
 {
-    auto dialog = new SelectResolution( *_capture, this );
-    if ( dialog->exec() == QDialog::Accepted )
-    {
-        QImageEncoderSettings imageSettings;
-        imageSettings.setResolution( dialog->selectedResolution() );
-        _capture->setEncodingSettings( imageSettings );
-    }
-    delete dialog;
+    QImageEncoderSettings imageSettings;
+    imageSettings.setResolution( res );
+    _capture->setEncodingSettings( imageSettings );
 }
+
+
