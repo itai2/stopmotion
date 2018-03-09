@@ -25,10 +25,13 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
         main.cpp \
-        mainwindow.cpp
+        mainwindow.cpp \
+    selectresolution.cpp
 
 HEADERS += \
-        mainwindow.h
+        mainwindow.h \
+    selectresolution.h
 
 FORMS += \
-        mainwindow.ui
+        mainwindow.ui \
+    selectresolution.ui
