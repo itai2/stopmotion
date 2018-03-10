@@ -7,6 +7,7 @@
 #include <QCameraInfo>
 #include <QMainWindow>
 #include <QScopedPointer>
+#include <QSettings>
 
 namespace Ui {
 class MainWindow;
@@ -31,6 +32,7 @@ private:
     QCameraInfo _currentCameraInfo;
     QSize _currentResolution;
     QScopedPointer<QCameraImageCapture> _capture;
+    QSettings _settings;
     void setResolution( QSize res );
     void setCamera( QCameraInfo selected, QSize resolution );
 };

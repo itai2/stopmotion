@@ -5,15 +5,19 @@
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
-    ui(new Ui::MainWindow)
+    ui(new Ui::MainWindow),
+    _settings( "Bteam", "StopMotion" )
 {
     ui->setupUi(this);
+
+    QString savedCamera = _settings.value( "camera" ).toString();
+    _currentResolution = _settings.value( "resolution" ).toSize();
 
     _currentCameraInfo = QCameraInfo::defaultCamera();
     const QList<QCameraInfo> availableCameras = QCameraInfo::availableCameras();
     for (const QCameraInfo &cameraInfo : availableCameras)
     {
-        if ( cameraInfo.description().contains( "930" ) )
+        if ( cameraInfo.description().contains( savedCamera ) )
              _currentCameraInfo = cameraInfo;
     }
 
@@ -31,6 +35,8 @@ void MainWindow::setResolution( QSize res )
     QImageEncoderSettings imageSettings;
     imageSettings.setResolution( res );
     _capture->setEncodingSettings( imageSettings );
+    _currentResolution = res;
+    _settings.setValue( "resolution", _currentResolution );
 }
 
 void MainWindow::setCamera( QCameraInfo selected, QSize resolution )
@@ -40,6 +46,7 @@ void MainWindow::setCamera( QCameraInfo selected, QSize resolution )
     _camera->setViewfinder( ui->_viewfinder );
     _capture.reset( new QCameraImageCapture( _camera.data() ) );
     _camera->start();
+    _settings.setValue( "camera", _currentCameraInfo.description() );
     setResolution( resolution );
 }
 
@@ -47,10 +54,7 @@ void MainWindow::on_action_SelectResolution_triggered()
 {
     auto dialog = new SelectResolution( *_capture, this );
     if ( dialog->exec() == QDialog::Accepted )
-    {
-        _currentResolution = dialog->selectedResolution();
-        setResolution( _currentResolution );
-    }
+        setResolution( dialog->selectedResolution() );
     delete dialog;
 }
 
