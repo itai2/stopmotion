@@ -24,12 +24,10 @@ public:
 
 private slots:
     void on_action_SelectResolution_triggered();
-
     void on_actionSelect_Ca_mera_triggered();
-
     void on_action_Select_Working_Directory_triggered();
-
     void on__captureButton_clicked();
+    void imageSaved( int id, const QString &fileName );
 
 private:
     Ui::MainWindow *ui;
@@ -46,6 +44,8 @@ private:
     void setTopQuality();
 
     void setCurrentFileNumber();
+    void setupImageList();
+    QStringList getAllImages(QDir::SortFlags flags);
 };
 
 #endif // MAINWINDOW_H

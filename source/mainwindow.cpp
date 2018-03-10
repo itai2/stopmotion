@@ -33,9 +33,9 @@ MainWindow::MainWindow(QWidget *parent) :
     }
 
     setCamera( _currentCameraInfo, _currentResolution );
-
-
     ui->_viewfinder->show();
+
+    setupImageList();
 }
 
 MainWindow::~MainWindow()
@@ -59,15 +59,31 @@ void MainWindow::setTopQuality()
     _capture->setEncodingSettings( encodingSettings );
 }
 
+QStringList MainWindow::getAllImages( QDir::SortFlags flags)
+{
+    return QDir( _workingDir ).entryList( QStringList( "*.jpg" ),
+                                          QDir::Files,
+                                          flags );
+}
+
 void MainWindow::setCurrentFileNumber()
 {
-    auto allImages = QDir( _workingDir ).entryList( QStringList( "*.jpg" ),
-                                                    QDir::Files,
-                                                    QDir::Name | QDir::Reversed );
+    auto allImages = getAllImages( QDir::Name | QDir::Reversed );
     if ( allImages.isEmpty() )
         _currentFileNumber = 1;
     else
         _currentFileNumber = QFileInfo( allImages[0] ).baseName().toInt() + 1;
+}
+
+void MainWindow::setupImageList()
+{
+    ui->_imageIconList->setIconSize( QSize( 160, 90 ) );
+    qDebug() << "Icon size is " << ui->_imageIconList->iconSize();
+    auto allImages = getAllImages( QDir::Name );
+    for ( auto imageFileName : allImages )
+    {
+        new QListWidgetItem( QIcon( QDir( _workingDir ).absoluteFilePath( imageFileName ) ), QString(), ui->_imageIconList );
+    }
 }
 
 void MainWindow::setCamera( QCameraInfo selected, QSize resolution )
@@ -76,6 +92,7 @@ void MainWindow::setCamera( QCameraInfo selected, QSize resolution )
     _camera.reset( new QCamera( _currentCameraInfo ) );
     _camera->setViewfinder( ui->_viewfinder );
     _capture.reset( new QCameraImageCapture( _camera.data() ) );
+    QObject::connect( _capture.data(), &QCameraImageCapture::imageSaved, this, &MainWindow::imageSaved );
     _camera->start();
     _camera->setCaptureMode( QCamera::CaptureStillImage );
 
@@ -124,10 +141,19 @@ void MainWindow::on__captureButton_clicked()
 {
     if ( !_capture->isReadyForCapture() )
         return;
-    _capture->capture( QDir( _workingDir ).absoluteFilePath( QString( "%1" ).arg( _currentFileNumber,
+
+    ui->_captureButton->setEnabled( false );
+    QString filePath = QDir( _workingDir ).absoluteFilePath( QString( "%1" ).arg( _currentFileNumber,
                                                                                   8,
                                                                                   10,
-                                                                                  QChar('0') ) ) );
+                                                                                  QChar('0') ) );
+    _capture->capture( filePath );
+}
+
+void MainWindow::imageSaved( int /*id*/, const QString &fileName )
+{
     ++ _currentFileNumber;
-    while ( !_capture->isReadyForCapture() );
+    ui->_imageIconList->addItem( new QListWidgetItem( QIcon( fileName ), QString() ) );
+    ui->_imageIconList->scrollToBottom();
+    ui->_captureButton->setEnabled( true );
 }

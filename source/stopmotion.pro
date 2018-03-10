@@ -38,3 +38,6 @@ FORMS += \
         mainwindow.ui \
     selectresolution.ui \
     selectcamera.ui
+
+DISTFILES += \
+    Todo.txt
