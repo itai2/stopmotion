@@ -26,6 +26,8 @@ private slots:
 
     void on_actionSelect_Ca_mera_triggered();
 
+    void on_action_Select_Working_Directory_triggered();
+
 private:
     Ui::MainWindow *ui;
     QScopedPointer<QCamera> _camera;
@@ -33,6 +35,7 @@ private:
     QSize _currentResolution;
     QScopedPointer<QCameraImageCapture> _capture;
     QSettings _settings;
+    QString _workingDir;
     void setResolution( QSize res );
     void setCamera( QCameraInfo selected, QSize resolution );
 };

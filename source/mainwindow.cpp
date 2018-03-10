@@ -2,6 +2,7 @@
 #include "selectcamera.h"
 #include "ui_mainwindow.h"
 #include <QCameraInfo>
+#include <QFileDialog>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -12,6 +13,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     QString savedCamera = _settings.value( "camera" ).toString();
     _currentResolution = _settings.value( "resolution" ).toSize();
+    _workingDir = _settings.value( "working_dir" ).toString();
 
     _currentCameraInfo = QCameraInfo::defaultCamera();
     const QList<QCameraInfo> availableCameras = QCameraInfo::availableCameras();
@@ -72,4 +74,16 @@ void MainWindow::on_actionSelect_Ca_mera_triggered()
     else
         setCamera( _currentCameraInfo, _currentResolution );
     delete dialog;
+}
+
+void MainWindow::on_action_Select_Working_Directory_triggered()
+{
+    QString selectedDir = QFileDialog::getExistingDirectory( this,
+                                                             "Please select your working directory",
+                                                             _workingDir );
+    if ( selectedDir.isEmpty() )
+        return;
+
+    _workingDir = selectedDir;
+    _settings.setValue( "working_dir", _workingDir );
 }

@@ -38,6 +38,7 @@
     <property name="title">
      <string>&amp;File</string>
     </property>
+    <addaction name="action_Select_Working_Directory"/>
     <addaction name="actionExit"/>
    </widget>
    <widget class="QMenu" name="menu_Camera">
@@ -72,6 +73,11 @@
   <action name="actionSelect_Ca_mera">
    <property name="text">
     <string>Select Ca&amp;mera</string>
+   </property>
+  </action>
+  <action name="action_Select_Working_Directory">
+   <property name="text">
+    <string>&amp;Select Working Directory</string>
    </property>
   </action>
  </widget>
