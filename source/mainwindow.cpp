@@ -94,3 +94,11 @@ void MainWindow::on_action_Select_Working_Directory_triggered()
 
     setWorkingDir( selectedDir );
 }
+
+void MainWindow::on__captureButton_clicked()
+{
+    if ( !_capture->isReadyForCapture() )
+        return;
+    _capture->capture( _workingDir + "/image.jpg" );
+    while ( !_capture->isReadyForCapture() );
+}

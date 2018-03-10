@@ -28,6 +28,8 @@ private slots:
 
     void on_action_Select_Working_Directory_triggered();
 
+    void on__captureButton_clicked();
+
 private:
     Ui::MainWindow *ui;
     QScopedPointer<QCamera> _camera;

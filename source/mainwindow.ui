@@ -14,7 +14,7 @@
    <string>MainWindow</string>
   </property>
   <widget class="QWidget" name="centralWidget">
-   <layout class="QVBoxLayout" name="verticalLayout" stretch="0,1">
+   <layout class="QVBoxLayout" name="verticalLayout" stretch="0,1,0">
     <item>
      <widget class="QLabel" name="_workingDirLabel">
       <property name="text">
@@ -24,6 +24,13 @@
     </item>
     <item>
      <widget class="QCameraViewfinder" name="_viewfinder" native="true"/>
+    </item>
+    <item>
+     <widget class="QPushButton" name="_captureButton">
+      <property name="text">
+       <string>Capture</string>
+      </property>
+     </widget>
     </item>
    </layout>
   </widget>
