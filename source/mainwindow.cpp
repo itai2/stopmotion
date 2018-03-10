@@ -4,6 +4,13 @@
 #include <QCameraInfo>
 #include <QFileDialog>
 
+void MainWindow::setWorkingDir( const QString &dir )
+{
+    _workingDir = dir;
+    _settings.setValue( "working_dir", _workingDir );
+    ui->_workingDirLabel->setText( _workingDir );
+}
+
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
@@ -13,7 +20,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     QString savedCamera = _settings.value( "camera" ).toString();
     _currentResolution = _settings.value( "resolution" ).toSize();
-    _workingDir = _settings.value( "working_dir" ).toString();
+    setWorkingDir( _settings.value( "working_dir" ).toString() );
 
     _currentCameraInfo = QCameraInfo::defaultCamera();
     const QList<QCameraInfo> availableCameras = QCameraInfo::availableCameras();
@@ -48,6 +55,7 @@ void MainWindow::setCamera( QCameraInfo selected, QSize resolution )
     _camera->setViewfinder( ui->_viewfinder );
     _capture.reset( new QCameraImageCapture( _camera.data() ) );
     _camera->start();
+    _camera->setCaptureMode( QCamera::CaptureStillImage );
     _settings.setValue( "camera", _currentCameraInfo.description() );
     setResolution( resolution );
 }
@@ -84,6 +92,5 @@ void MainWindow::on_action_Select_Working_Directory_triggered()
     if ( selectedDir.isEmpty() )
         return;
 
-    _workingDir = selectedDir;
-    _settings.setValue( "working_dir", _workingDir );
+    setWorkingDir( selectedDir );
 }
