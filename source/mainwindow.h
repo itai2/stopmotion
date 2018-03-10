@@ -4,6 +4,7 @@
 #include "selectresolution.h"
 #include <QCamera>
 #include <QCameraImageCapture>
+#include <QCameraInfo>
 #include <QMainWindow>
 #include <QScopedPointer>
 
@@ -20,21 +21,18 @@ public:
     ~MainWindow();
 
 private slots:
-    void on_action_SelectResolution_triggered()
-    {
-        auto dialog = new SelectResolution( *_capture, this );
-        if ( dialog->exec() == QDialog::Accepted )
-            setResolution( dialog->selectedResolution() );
-        delete dialog;
-    }
+    void on_action_SelectResolution_triggered();
+
+    void on_actionSelect_Ca_mera_triggered();
 
 private:
     Ui::MainWindow *ui;
     QScopedPointer<QCamera> _camera;
+    QCameraInfo _currentCameraInfo;
+    QSize _currentResolution;
     QScopedPointer<QCameraImageCapture> _capture;
     void setResolution( QSize res );
-
-    void setCamera( QCameraInfo selected );
+    void setCamera( QCameraInfo selected, QSize resolution );
 };
 
 #endif // MAINWINDOW_H

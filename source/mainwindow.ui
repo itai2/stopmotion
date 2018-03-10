@@ -44,6 +44,7 @@
     <property name="title">
      <string>&amp;Camera</string>
     </property>
+    <addaction name="actionSelect_Ca_mera"/>
     <addaction name="action_SelectResolution"/>
    </widget>
    <addaction name="menuFile"/>
@@ -66,6 +67,11 @@
   <action name="action_SelectResolution">
    <property name="text">
     <string>&amp;Select resolution</string>
+   </property>
+  </action>
+  <action name="actionSelect_Ca_mera">
+   <property name="text">
+    <string>Select Ca&amp;mera</string>
    </property>
   </action>
  </widget>
