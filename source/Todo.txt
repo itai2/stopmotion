@@ -4,3 +4,5 @@
 - play a video
 - inset in the middle
 - delete from the middle
+- maybe capture with opencv
+
