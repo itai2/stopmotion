@@ -36,6 +36,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->_viewfinder->show();
 
     setupImageList();
+    ui->_captureButton->setFocus();
 }
 
 MainWindow::~MainWindow()
@@ -156,4 +157,5 @@ void MainWindow::imageSaved( int /*id*/, const QString &fileName )
     ui->_imageIconList->addItem( new QListWidgetItem( QIcon( fileName ), QString() ) );
     ui->_imageIconList->scrollToBottom();
     ui->_captureButton->setEnabled( true );
+    ui->_captureButton->setFocus();
 }
