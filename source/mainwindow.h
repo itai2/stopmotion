@@ -5,6 +5,7 @@
 #include <QCamera>
 #include <QCameraImageCapture>
 #include <QCameraInfo>
+#include <QDir>
 #include <QMainWindow>
 #include <QScopedPointer>
 #include <QSettings>
@@ -38,10 +39,22 @@ private:
     QScopedPointer<QCameraImageCapture> _capture;
     QSettings _settings;
     QString _workingDir;
+    int _currentFileNumber;
     void setResolution( QSize res );
     void setCamera( QCameraInfo selected, QSize resolution );
     void setWorkingDir( const QString &dir );
     void setTopQuality();
+
+    void setCurrentFileNumber()
+    {
+        auto allPhotos = QDir( _workingDir ).entryList( QStringList( "*.jpg" ),
+                                                        QDir::Files,
+                                                        QDir::Name | QDir::Reversed );
+        if ( allPhotos.isEmpty() )
+            _currentFileNumber = 1;
+        else
+            _currentFileNumber = QFileInfo( allPhotos[0] ).baseName().toInt() + 1;
+    }
 };
 
 #endif // MAINWINDOW_H

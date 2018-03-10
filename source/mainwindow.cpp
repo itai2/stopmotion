@@ -31,6 +31,9 @@ MainWindow::MainWindow(QWidget *parent) :
     }
 
     setCamera( _currentCameraInfo, _currentResolution );
+
+    setCurrentFileNumber();
+
     ui->_viewfinder->show();
 }
 
@@ -109,6 +112,10 @@ void MainWindow::on__captureButton_clicked()
 {
     if ( !_capture->isReadyForCapture() )
         return;
-    _capture->capture( QDir( _workingDir ).absoluteFilePath( "image.jpg" ) );
+    _capture->capture( QDir( _workingDir ).absoluteFilePath( QString( "%1" ).arg( _currentFileNumber,
+                                                                                  8,
+                                                                                  10,
+                                                                                  QChar('0') ) ) );
+    ++ _currentFileNumber;
     while ( !_capture->isReadyForCapture() );
 }
