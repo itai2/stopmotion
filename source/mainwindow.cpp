@@ -48,6 +48,13 @@ void MainWindow::setResolution( QSize res )
     _settings.setValue( "resolution", _currentResolution );
 }
 
+void MainWindow::setTopQuality()
+{
+    auto encodingSettings = _capture->encodingSettings();
+    encodingSettings.setQuality( QMultimedia::VeryHighQuality );
+    _capture->setEncodingSettings( encodingSettings );
+}
+
 void MainWindow::setCamera( QCameraInfo selected, QSize resolution )
 {
     _currentCameraInfo = selected;
@@ -56,6 +63,9 @@ void MainWindow::setCamera( QCameraInfo selected, QSize resolution )
     _capture.reset( new QCameraImageCapture( _camera.data() ) );
     _camera->start();
     _camera->setCaptureMode( QCamera::CaptureStillImage );
+
+    setTopQuality();
+
     _settings.setValue( "camera", _currentCameraInfo.description() );
     setResolution( resolution );
 }
@@ -99,6 +109,6 @@ void MainWindow::on__captureButton_clicked()
 {
     if ( !_capture->isReadyForCapture() )
         return;
-    _capture->capture( _workingDir + "/image.jpg" );
+    _capture->capture( QDir( _workingDir ).absoluteFilePath( "image.jpg" ) );
     while ( !_capture->isReadyForCapture() );
 }

@@ -41,6 +41,7 @@ private:
     void setResolution( QSize res );
     void setCamera( QCameraInfo selected, QSize resolution );
     void setWorkingDir( const QString &dir );
+    void setTopQuality();
 };
 
 #endif // MAINWINDOW_H
