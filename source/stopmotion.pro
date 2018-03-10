@@ -40,4 +40,5 @@ FORMS += \
     selectcamera.ui
 
 DISTFILES += \
-    Todo.txt
+    Todo.txt \
+    .gitignore
