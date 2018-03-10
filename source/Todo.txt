@@ -1,4 +1,6 @@
 - space bar should capture
-- adjust list size to the icons
+- adjust list size to the icons V
 - check if we can capture in different resolution than viewfinder (no)
-
+- play a video
+- inset in the middle
+- delete from the middle
