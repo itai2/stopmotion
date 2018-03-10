@@ -79,6 +79,7 @@ void MainWindow::setCurrentFileNumber()
 void MainWindow::setupImageList()
 {
     ui->_imageIconList->setIconSize( QSize( 160, 90 ) );
+    ui->_imageIconList->setFixedWidth( ui->_imageIconList->iconSize().width() + 30 );
     qDebug() << "Icon size is " << ui->_imageIconList->iconSize();
     auto allImages = getAllImages( QDir::Name );
     for ( auto imageFileName : allImages )
