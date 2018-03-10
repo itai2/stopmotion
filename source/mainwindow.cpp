@@ -9,6 +9,7 @@ void MainWindow::setWorkingDir( const QString &dir )
     _workingDir = dir;
     _settings.setValue( "working_dir", _workingDir );
     ui->_workingDirLabel->setText( _workingDir );
+    setCurrentFileNumber();
 }
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -20,6 +21,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     QString savedCamera = _settings.value( "camera" ).toString();
     _currentResolution = _settings.value( "resolution" ).toSize();
+
     setWorkingDir( _settings.value( "working_dir" ).toString() );
 
     _currentCameraInfo = QCameraInfo::defaultCamera();
@@ -32,7 +34,6 @@ MainWindow::MainWindow(QWidget *parent) :
 
     setCamera( _currentCameraInfo, _currentResolution );
 
-    setCurrentFileNumber();
 
     ui->_viewfinder->show();
 }
@@ -56,6 +57,17 @@ void MainWindow::setTopQuality()
     auto encodingSettings = _capture->encodingSettings();
     encodingSettings.setQuality( QMultimedia::VeryHighQuality );
     _capture->setEncodingSettings( encodingSettings );
+}
+
+void MainWindow::setCurrentFileNumber()
+{
+    auto allPhotos = QDir( _workingDir ).entryList( QStringList( "*.jpg" ),
+                                                    QDir::Files,
+                                                    QDir::Name | QDir::Reversed );
+    if ( allPhotos.isEmpty() )
+        _currentFileNumber = 1;
+    else
+        _currentFileNumber = QFileInfo( allPhotos[0] ).baseName().toInt() + 1;
 }
 
 void MainWindow::setCamera( QCameraInfo selected, QSize resolution )

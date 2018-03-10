@@ -45,16 +45,7 @@ private:
     void setWorkingDir( const QString &dir );
     void setTopQuality();
 
-    void setCurrentFileNumber()
-    {
-        auto allPhotos = QDir( _workingDir ).entryList( QStringList( "*.jpg" ),
-                                                        QDir::Files,
-                                                        QDir::Name | QDir::Reversed );
-        if ( allPhotos.isEmpty() )
-            _currentFileNumber = 1;
-        else
-            _currentFileNumber = QFileInfo( allPhotos[0] ).baseName().toInt() + 1;
-    }
+    void setCurrentFileNumber();
 };
 
 #endif // MAINWINDOW_H
