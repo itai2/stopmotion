@@ -10,6 +10,7 @@ void MainWindow::setWorkingDir( const QString &dir )
     _settings.setValue( "working_dir", _workingDir );
     ui->_workingDirLabel->setText( _workingDir );
     setCurrentFileNumber();
+    setupImageList();
 }
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -35,7 +36,6 @@ MainWindow::MainWindow(QWidget *parent) :
     setCamera( _currentCameraInfo, _currentResolution );
     ui->_viewfinder->show();
 
-    setupImageList();
     ui->_captureButton->setFocus();
 }
 
@@ -78,6 +78,7 @@ void MainWindow::setCurrentFileNumber()
 
 void MainWindow::setupImageList()
 {
+    ui->_imageIconList->clear();
     ui->_imageIconList->setIconSize( QSize( 160, 90 ) );
     ui->_imageIconList->setFixedWidth( ui->_imageIconList->iconSize().width() + 30 );
     qDebug() << "Icon size is " << ui->_imageIconList->iconSize();

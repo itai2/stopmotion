@@ -1,4 +1,4 @@
 - space bar should capture
 - adjust list size to the icons
-- check if we can capture in different resolution than viewfinder
+- check if we can capture in different resolution than viewfinder (no)
 
