@@ -1,6 +1,5 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-
 #include <QCameraInfo>
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -17,10 +16,7 @@ MainWindow::MainWindow(QWidget *parent) :
              selected = cameraInfo;
     }
 
-    _camera = new QCamera( selected );
-    _camera->setViewfinder( ui->_viewfinder );
-    _capture = new QCameraImageCapture( _camera );
-    _camera->start();
+    setCamera( selected );
     ui->_viewfinder->show();
 }
 
@@ -36,4 +32,11 @@ void MainWindow::setResolution( QSize res )
     _capture->setEncodingSettings( imageSettings );
 }
 
+void MainWindow::setCamera(QCameraInfo selected)
+{
+    _camera.reset( new QCamera( selected ) );
+    _camera->setViewfinder( ui->_viewfinder );
+    _capture.reset( new QCameraImageCapture( _camera.data() ) );
+    _camera->start();
+}
 

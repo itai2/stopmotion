@@ -5,6 +5,7 @@
 #include <QCamera>
 #include <QCameraImageCapture>
 #include <QMainWindow>
+#include <QScopedPointer>
 
 namespace Ui {
 class MainWindow;
@@ -29,9 +30,11 @@ private slots:
 
 private:
     Ui::MainWindow *ui;
-    QCamera *_camera;
-    QCameraImageCapture *_capture;
+    QScopedPointer<QCamera> _camera;
+    QScopedPointer<QCameraImageCapture> _capture;
     void setResolution( QSize res );
+
+    void setCamera( QCameraInfo selected );
 };
 
 #endif // MAINWINDOW_H
