@@ -61,13 +61,13 @@ void MainWindow::setTopQuality()
 
 void MainWindow::setCurrentFileNumber()
 {
-    auto allPhotos = QDir( _workingDir ).entryList( QStringList( "*.jpg" ),
+    auto allImages = QDir( _workingDir ).entryList( QStringList( "*.jpg" ),
                                                     QDir::Files,
                                                     QDir::Name | QDir::Reversed );
-    if ( allPhotos.isEmpty() )
+    if ( allImages.isEmpty() )
         _currentFileNumber = 1;
     else
-        _currentFileNumber = QFileInfo( allPhotos[0] ).baseName().toInt() + 1;
+        _currentFileNumber = QFileInfo( allImages[0] ).baseName().toInt() + 1;
 }
 
 void MainWindow::setCamera( QCameraInfo selected, QSize resolution )
