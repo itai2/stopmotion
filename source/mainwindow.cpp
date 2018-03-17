@@ -35,8 +35,10 @@ MainWindow::MainWindow(QWidget *parent) :
 
     setCamera( _currentCameraInfo, _currentResolution );
     ui->_viewfinder->show();
-
     ui->_captureButton->setFocus();
+
+    _movieTimeLine = new QTimeLine( 0 ,this );
+    connect( _movieTimeLine, &QTimeLine::frameChanged, this, &MainWindow::setNextMovieImage );
 }
 
 MainWindow::~MainWindow()
@@ -67,6 +69,14 @@ QStringList MainWindow::getAllImages( QDir::SortFlags flags)
                                           flags );
 }
 
+QString MainWindow::getImageFilePath(int imageNumber) const
+{
+    return QDir( _workingDir ).absoluteFilePath( QString( "%1" ).arg( imageNumber,
+                                                                      8,
+                                                                      10,
+                                                                      QChar('0') ) );
+}
+
 void MainWindow::setCurrentFileNumber()
 {
     auto allImages = getAllImages( QDir::Name | QDir::Reversed );
@@ -83,7 +93,7 @@ void MainWindow::setupImageList()
     ui->_imageIconList->setFixedWidth( ui->_imageIconList->iconSize().width() + 30 );
     qDebug() << "Icon size is " << ui->_imageIconList->iconSize();
     auto allImages = getAllImages( QDir::Name );
-    for ( auto imageFileName : allImages )
+    for ( auto &imageFileName : allImages )
     {
         new QListWidgetItem( QIcon( QDir( _workingDir ).absoluteFilePath( imageFileName ) ), QString(), ui->_imageIconList );
     }
@@ -146,10 +156,7 @@ void MainWindow::on__captureButton_clicked()
         return;
 
     ui->_captureButton->setEnabled( false );
-    QString filePath = QDir( _workingDir ).absoluteFilePath( QString( "%1" ).arg( _currentFileNumber,
-                                                                                  8,
-                                                                                  10,
-                                                                                  QChar('0') ) );
+    QString filePath = getImageFilePath( _currentFileNumber );
     _capture->capture( filePath );
 }
 
@@ -160,4 +167,17 @@ void MainWindow::imageSaved( int /*id*/, const QString &fileName )
     ui->_imageIconList->scrollToBottom();
     ui->_captureButton->setEnabled( true );
     ui->_captureButton->setFocus();
+}
+
+void MainWindow::on__play_clicked()
+{
+    _movieTimeLine->setDuration( ( _currentFileNumber - 1 ) * 100 );
+    _movieTimeLine->setFrameRange( 1, _currentFileNumber - 1 );
+    _movieTimeLine->start();
+}
+
+void MainWindow::setNextMovieImage(int frame)
+{
+    QPixmap nextImagee( getImageFilePath( frame ) );
+    ui->_movie->setPixmap( nextImagee );
 }

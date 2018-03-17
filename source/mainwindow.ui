@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>724</width>
+    <width>743</width>
     <height>517</height>
    </rect>
   </property>
@@ -14,7 +14,7 @@
    <string>MainWindow</string>
   </property>
   <widget class="QWidget" name="centralWidget">
-   <layout class="QHBoxLayout" name="horizontalLayout" stretch="1,0">
+   <layout class="QHBoxLayout" name="horizontalLayout" stretch="1,0,1">
     <item>
      <layout class="QVBoxLayout" name="verticalLayout" stretch="0,1,0">
       <item>
@@ -42,6 +42,24 @@
     <item>
      <widget class="QListWidget" name="_imageIconList"/>
     </item>
+    <item>
+     <layout class="QVBoxLayout" name="verticalLayout_2" stretch="1,0">
+      <item>
+       <widget class="QLabel" name="_movie">
+        <property name="text">
+         <string>TextLabel</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="_play">
+        <property name="text">
+         <string>Play</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
    </layout>
   </widget>
   <widget class="QMenuBar" name="menuBar">
@@ -49,7 +67,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>724</width>
+     <width>743</width>
      <height>22</height>
     </rect>
    </property>
