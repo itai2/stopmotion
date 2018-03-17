@@ -30,7 +30,7 @@ private slots:
     void on__captureButton_clicked();
     void imageSaved( int id, const QString &fileName );
     void on__play_clicked();
-    void setNextMovieImage( int frame );
+    void setMovieImage( int frame );
 
 private:
     Ui::MainWindow *ui;

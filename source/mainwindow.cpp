@@ -38,7 +38,16 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->_captureButton->setFocus();
 
     _movieTimeLine = new QTimeLine( 0 ,this );
-    connect( _movieTimeLine, &QTimeLine::frameChanged, this, &MainWindow::setNextMovieImage );
+    connect( _movieTimeLine, &QTimeLine::frameChanged, this, &MainWindow::setMovieImage );
+
+    int frameTimeMs = _settings.value( "frame_time_ms" ).toInt();
+    ui->_frameTimeMs->setRange( 1, 10000 );
+    ui->_frameTimeMs->setValue( frameTimeMs );
+    connect( ui->_frameTimeMs,
+             static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged),
+             [this] (int newValue ) {_settings.setValue( "frame_time_ms", newValue ); } );
+
+    setMovieImage( 1 );
 }
 
 MainWindow::~MainWindow()
@@ -171,12 +180,12 @@ void MainWindow::imageSaved( int /*id*/, const QString &fileName )
 
 void MainWindow::on__play_clicked()
 {
-    _movieTimeLine->setDuration( ( _currentFileNumber - 1 ) * 100 );
+    _movieTimeLine->setDuration( ( _currentFileNumber - 1 ) * ui->_frameTimeMs->value() );
     _movieTimeLine->setFrameRange( 1, _currentFileNumber - 1 );
     _movieTimeLine->start();
 }
 
-void MainWindow::setNextMovieImage(int frame)
+void MainWindow::setMovieImage(int frame)
 {
     QPixmap nextImagee( getImageFilePath( frame ) );
     ui->_movie->setPixmap( nextImagee );
