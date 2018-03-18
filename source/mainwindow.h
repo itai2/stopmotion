@@ -31,6 +31,7 @@ private slots:
     void imageSaved( int id, const QString &fileName );
     void on__play_clicked();
     void setMovieImage( int frame );
+    void setMovieImage( const QPixmap &image );
 
 private:
     Ui::MainWindow *ui;
@@ -53,6 +54,9 @@ private:
     void setupImageList();
     QStringList getAllImages(QDir::SortFlags flags);
     QString getImageFilePath( int imageNumber ) const;
+
+    //overide events
+    void resizeEvent(QResizeEvent *event);
 };
 
 #endif // MAINWINDOW_H

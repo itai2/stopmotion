@@ -38,7 +38,10 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->_captureButton->setFocus();
 
     _movieTimeLine = new QTimeLine( 0 ,this );
-    connect( _movieTimeLine, &QTimeLine::frameChanged, this, &MainWindow::setMovieImage );
+    connect( _movieTimeLine,
+             &QTimeLine::frameChanged,
+             this,
+             static_cast<void (MainWindow::*)(int)>(&MainWindow::setMovieImage) );
 
     int frameTimeMs = _settings.value( "frame_time_ms" ).toInt();
     ui->_frameTimeMs->setRange( 1, 10000 );
@@ -84,6 +87,11 @@ QString MainWindow::getImageFilePath(int imageNumber) const
                                                                       8,
                                                                       10,
                                                                       QChar('0') ) );
+}
+
+void MainWindow::resizeEvent(QResizeEvent *)
+{
+    setMovieImage( *ui->_movie->pixmap() );
 }
 
 void MainWindow::setCurrentFileNumber()
@@ -187,6 +195,14 @@ void MainWindow::on__play_clicked()
 
 void MainWindow::setMovieImage(int frame)
 {
-    QPixmap nextImagee( getImageFilePath( frame ) );
-    ui->_movie->setPixmap( nextImagee );
+    QPixmap nextImage( getImageFilePath( frame ) );
+    setMovieImage( nextImage );
+}
+
+void MainWindow::setMovieImage(const QPixmap &image)
+{
+    ui->_movie->setPixmap( image.scaled( ui->_movie->width(),
+                                         ui->_movie->height(),
+                                         Qt::KeepAspectRatio ) );
+
 }
