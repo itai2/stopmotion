@@ -206,3 +206,8 @@ void MainWindow::setMovieImage(const QPixmap &image)
                                          Qt::KeepAspectRatio ) );
 
 }
+
+void MainWindow::on_actionExit_triggered()
+{
+    QCoreApplication::quit();
+}

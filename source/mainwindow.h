@@ -33,6 +33,8 @@ private slots:
     void setMovieImage( int frame );
     void setMovieImage( const QPixmap &image );
 
+    void on_actionExit_triggered();
+
 private:
     Ui::MainWindow *ui;
     QScopedPointer<QCamera> _camera;
