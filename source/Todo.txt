@@ -6,3 +6,5 @@
 - delete from the middle
 - maybe capture with opencv
 
+Use guvcview or webcamoid for settings
+also check qv4l2 -V /dev/video1
