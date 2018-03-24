@@ -27,12 +27,14 @@ SOURCES += \
         main.cpp \
         mainwindow.cpp \
     selectresolution.cpp \
-    selectcamera.cpp
+    selectcamera.cpp \
+    camerasettings.cpp
 
 HEADERS += \
         mainwindow.h \
     selectresolution.h \
-    selectcamera.h
+    selectcamera.h \
+    camerasettings.h
 
 FORMS += \
         mainwindow.ui \
@@ -42,3 +44,5 @@ FORMS += \
 DISTFILES += \
     Todo.txt \
     .gitignore
+
+LIBS += -lv4l2

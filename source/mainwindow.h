@@ -1,6 +1,7 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include "camerasettings.h"
 #include "selectresolution.h"
 #include <QCamera>
 #include <QCameraImageCapture>
@@ -59,6 +60,9 @@ private:
 
     //overide events
     void resizeEvent(QResizeEvent *event);
+
+    //manual ui
+    QScopedPointer<CameraSettings> _cameraSettings;
 };
 
 #endif // MAINWINDOW_H

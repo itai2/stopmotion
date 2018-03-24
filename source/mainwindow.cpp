@@ -16,7 +16,8 @@ void MainWindow::setWorkingDir( const QString &dir )
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
-    _settings( "Bteam", "StopMotion" )
+    _settings( "Bteam", "StopMotion" ),
+    _cameraSettings( 0 )
 {
     ui->setupUi(this);
 
@@ -130,6 +131,9 @@ void MainWindow::setCamera( QCameraInfo selected, QSize resolution )
 
     _settings.setValue( "camera", _currentCameraInfo.description() );
     setResolution( resolution );
+
+    _cameraSettings.reset( new CameraSettings( ui->_cameraSettingsHolder ) );
+    _cameraSettings->setUpCameraControlTabs( ui->_cameraSettingsHolder->width() );
 }
 
 void MainWindow::on_action_SelectResolution_triggered()
