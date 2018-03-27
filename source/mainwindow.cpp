@@ -43,7 +43,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect( _movieTimeLine,
              &QTimeLine::frameChanged,
              this,
-             static_cast<void (MainWindow::*)(int)>(&MainWindow::setMovieImage) );
+             QOverload<int>::of(&MainWindow::setMovieImage) );
 
     int frameTimeMs = _settings.value( "frame_time_ms" ).toInt();
     ui->_frameTimeMs->setRange( 1, 10000 );
@@ -89,11 +89,6 @@ QString MainWindow::getImageFilePath(int imageNumber) const
                                                                       8,
                                                                       10,
                                                                       QChar('0') ) );
-}
-
-void MainWindow::resizeEvent(QResizeEvent *)
-{
-    setMovieImage( *ui->_movie->pixmap() );
 }
 
 void MainWindow::setCurrentFileNumber()
@@ -207,6 +202,7 @@ void MainWindow::setMovieImage(int frame)
 
 void MainWindow::setMovieImage(const QPixmap &image)
 {
+    qDebug() << __FUNCTION__ << "w: " << ui->_movie->width() << ", h: " << ui->_movie->height();
     ui->_movie->setPixmap( image.scaled( ui->_movie->width(),
                                          ui->_movie->height(),
                                          Qt::KeepAspectRatio ) );

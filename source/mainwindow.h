@@ -59,7 +59,7 @@ private:
     QString getImageFilePath( int imageNumber ) const;
 
     //overide events
-    void resizeEvent(QResizeEvent *event);
+    //void resizeEvent(QResizeEvent *event);
 
     //manual ui
     QScopedPointer<CameraSettings> _cameraSettings;
