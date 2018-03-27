@@ -29,7 +29,6 @@ CameraSettings::CameraSettings( QWidget *parent )
       m_vMargin(15),
       m_hMargin(5),
       m_pxw(25),
-      m_sigMapper( 0 ),
       m_ctrlNotifier( 0 )
 {
 }
@@ -166,6 +165,7 @@ void CameraSettings::addCtrl(QGridLayout *grid, const v4l2_query_ext_ctrl &qec)
     QComboBox *combo;
     QSpinBox *spin;
     QSlider *slider;
+    QCheckBox *checkbox;
     struct v4l2_querymenu qmenu;
     QWidget *wContainer = new QWidget();
     QHBoxLayout *m_boxLayout = new QHBoxLayout(wContainer);
@@ -193,10 +193,9 @@ void CameraSettings::addCtrl(QGridLayout *grid, const v4l2_query_ext_ctrl &qec)
             wContainer->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
             addWidget(grid, wContainer);
 
-            connect(spin, SIGNAL(valueChanged(int)), slider, SLOT(setValue(int)));
-            connect(slider, SIGNAL(valueChanged(int)), spin, SLOT(setValue(int)));
-            connect(m_widgetMap[qec.id], SIGNAL(valueChanged(int)),
-                m_sigMapper, SLOT(map()));
+            connect(spin, QOverload<int>::of(&QSpinBox::valueChanged), slider, &QSlider::setValue);
+            connect(slider, &QSlider::valueChanged, spin, &QSpinBox::setValue);
+            connect(spin, QOverload<int>::of(&QSpinBox::valueChanged), [=](int){ ctrlAction( qec.id ); } );
             break;
         }
 
@@ -205,10 +204,8 @@ void CameraSettings::addCtrl(QGridLayout *grid, const v4l2_query_ext_ctrl &qec)
         edit->setValidator(val);
         addWidget(grid, edit);
         m_widgetMap[qec.id] = edit;
-        connect(m_widgetMap[qec.id], SIGNAL(editingFinished()),
-                m_sigMapper, SLOT(map()));
-        connect(m_widgetMap[qec.id], SIGNAL(returnPressed()),
-                m_sigMapper, SLOT(map()));
+        connect( edit, &QLineEdit::editingFinished, [=] (){ ctrlAction( qec.id );});
+        connect( edit, &QLineEdit::returnPressed, [=] (){ ctrlAction( qec.id );});
         break;
 
     case V4L2_CTRL_TYPE_INTEGER64:
@@ -216,10 +213,8 @@ void CameraSettings::addCtrl(QGridLayout *grid, const v4l2_query_ext_ctrl &qec)
         edit = new QLineEdit(p);
         m_widgetMap[qec.id] = edit;
         addWidget(grid, edit);
-        connect(m_widgetMap[qec.id], SIGNAL(editingFinished()),
-                m_sigMapper, SLOT(map()));
-        connect(m_widgetMap[qec.id], SIGNAL(returnPressed()),
-                m_sigMapper, SLOT(map()));
+        connect( edit, &QLineEdit::editingFinished, [=](){ ctrlAction( qec.id ); } );
+        connect( edit, &QLineEdit::returnPressed, [=](){ ctrlAction( qec.id ); } );
         break;
 
     case V4L2_CTRL_TYPE_BITMASK:
@@ -228,10 +223,8 @@ void CameraSettings::addCtrl(QGridLayout *grid, const v4l2_query_ext_ctrl &qec)
         edit->setInputMask("HHHHHHHH");
         addWidget(grid, edit);
         m_widgetMap[qec.id] = edit;
-        connect(m_widgetMap[qec.id], SIGNAL(editingFinished()),
-                m_sigMapper, SLOT(map()));
-        connect(m_widgetMap[qec.id], SIGNAL(returnPressed()),
-                m_sigMapper, SLOT(map()));
+        connect( edit, &QLineEdit::editingFinished, [=](){ ctrlAction( qec.id ); } );
+        connect( edit, &QLineEdit::returnPressed, [=](){ ctrlAction( qec.id ); } );
         break;
 
     case V4L2_CTRL_TYPE_STRING:
@@ -240,18 +233,15 @@ void CameraSettings::addCtrl(QGridLayout *grid, const v4l2_query_ext_ctrl &qec)
         m_widgetMap[qec.id] = edit;
         edit->setMaxLength(qec.maximum);
         addWidget(grid, edit);
-        connect(m_widgetMap[qec.id], SIGNAL(editingFinished()),
-                m_sigMapper, SLOT(map()));
-        connect(m_widgetMap[qec.id], SIGNAL(returnPressed()),
-                m_sigMapper, SLOT(map()));
+        connect( edit, &QLineEdit::editingFinished, [=](){ ctrlAction( qec.id ); } );
+        connect( edit, &QLineEdit::returnPressed, [=](){ ctrlAction( qec.id ); } );
         break;
 
     case V4L2_CTRL_TYPE_BOOLEAN:
         addLabel(grid, name);
-        m_widgetMap[qec.id] = new QCheckBox(p);
+        m_widgetMap[qec.id] = checkbox = new QCheckBox(p);
         addWidget(grid, m_widgetMap[qec.id]);
-        connect(m_widgetMap[qec.id], SIGNAL(clicked()),
-                m_sigMapper, SLOT(map()));
+        connect( checkbox, &QCheckBox::clicked, [=](bool){ ctrlAction( qec.id ); } );
         break;
 
     case V4L2_CTRL_TYPE_BUTTON:
@@ -260,8 +250,7 @@ void CameraSettings::addCtrl(QGridLayout *grid, const v4l2_query_ext_ctrl &qec)
         m_widgetMap[qec.id] = button = new QToolButton(p);
         button->setIcon(QIcon(":/enterbutt.png"));
         addWidget(grid, m_widgetMap[qec.id]);
-        connect(m_widgetMap[qec.id], SIGNAL(clicked()),
-                m_sigMapper, SLOT(map()));
+        connect( button, &QToolButton::clicked, [=](bool){ ctrlAction( qec.id ); } );
         break;
 
     case V4L2_CTRL_TYPE_MENU:
@@ -280,15 +269,13 @@ void CameraSettings::addCtrl(QGridLayout *grid, const v4l2_query_ext_ctrl &qec)
                 combo->addItem(QString("%1").arg(qmenu.value));
         }
         addWidget(grid, m_widgetMap[qec.id]);
-        connect(m_widgetMap[qec.id], SIGNAL(activated(int)),
-                m_sigMapper, SLOT(map()));
+        connect( combo, QOverload<int>::of(&QComboBox::activated), [=](int){ ctrlAction( qec.id ); } );
         break;
 
     default:
         return;
     }
 
-    m_sigMapper->setMapping(m_widgetMap[qec.id], qec.id);
     if (qec.flags & CTRL_FLAG_DISABLED) {
         if (qobject_cast<QLineEdit *>(m_widgetMap[qec.id]))
             static_cast<QLineEdit *>(m_widgetMap[qec.id])->setReadOnly(true);
@@ -338,28 +325,24 @@ void CameraSettings::finishGrid(QGridLayout *grid, unsigned which)
     QCheckBox *cbox = new QCheckBox("Update on change", w);
     m_widgetMap[which | CTRL_UPDATE_ON_CHANGE] = cbox;
     addWidget(grid, cbox);
-    connect(cbox, SIGNAL(clicked()), m_sigMapper, SLOT(map()));
-    m_sigMapper->setMapping(cbox, which | CTRL_UPDATE_ON_CHANGE);
+    connect(cbox, &QCheckBox::clicked, [=](bool){ ctrlAction( which | CTRL_UPDATE_ON_CHANGE ); } );
 
     grid->setColumnStretch(0, 1);
 
     QPushButton *defBut = new QPushButton("Set Defaults", w);
     m_widgetMap[which | CTRL_DEFAULTS] = defBut;
     m_boxLayoutBottom->addWidget(defBut);
-    connect(defBut, SIGNAL(clicked()), m_sigMapper, SLOT(map()));
-    m_sigMapper->setMapping(defBut, which | CTRL_DEFAULTS);
+    connect(defBut, &QPushButton::clicked, [=](bool){ ctrlAction( which | CTRL_DEFAULTS );});
 
     QPushButton *refreshBut = new QPushButton("Refresh", w);
     m_widgetMap[which | CTRL_REFRESH] = refreshBut;
     m_boxLayoutBottom->addWidget(refreshBut);
-    connect(refreshBut, SIGNAL(clicked()), m_sigMapper, SLOT(map()));
-    m_sigMapper->setMapping(refreshBut, which | CTRL_REFRESH);
+    connect(refreshBut, &QPushButton::clicked, [=](bool){ ctrlAction( which | CTRL_REFRESH );});
 
     QPushButton *button = new QPushButton("Update", w);
     m_widgetMap[which | CTRL_UPDATE] = button;
     m_boxLayoutBottom->addWidget(button);
-    connect(button, SIGNAL(clicked()), m_sigMapper, SLOT(map()));
-    m_sigMapper->setMapping(button, which | CTRL_UPDATE);
+    connect(button, &QPushButton::clicked, [=](bool){ ctrlAction( which | CTRL_UPDATE );});
     connect(cbox, SIGNAL(toggled(bool)), button, SLOT(setDisabled(bool)));
 
     grid->addWidget(m_w, m_row, 3, Qt::AlignRight);
@@ -664,11 +647,6 @@ QString CameraSettings::getCtrlFlags(unsigned flags)
 void CameraSettings::setDevice(const QString &device, bool rawOpen)
 {
     closeDevice();
-    m_sigMapper = new QSignalMapper(this);
-    connect(m_sigMapper,
-            static_cast<void (QSignalMapper::*)(int)>(&QSignalMapper::mapped),
-            this,
-            &CameraSettings::ctrlAction );
 
     s_direct(rawOpen);
 
@@ -695,8 +673,6 @@ void CameraSettings::setDevice(const QString &device, bool rawOpen)
 
 void CameraSettings::closeDevice()
 {
-    delete m_sigMapper;
-    m_sigMapper = NULL;
     if (g_fd() >= 0) {
         if (m_ctrlNotifier) {
             delete m_ctrlNotifier;

@@ -39,7 +39,6 @@ private:
     const double m_pxw;
     WidgetMap m_widgetMap;
     WidgetMap m_sliderMap;
-    QSignalMapper *m_sigMapper;
     QSocketNotifier *m_ctrlNotifier;
 
     static bool is_valid_type(quint32 type);
