@@ -63,6 +63,7 @@ void CameraSettings::setUpCameraControlTabs( int m_winWidth )
     unsigned which;
     unsigned i;
     int id;
+    int cameraTabIndex = 0;
 
     while (query_ext_ctrl(qec, true) == 0) {
         if (is_valid_type(qec.type) &&
@@ -126,7 +127,11 @@ void CameraSettings::setUpCameraControlTabs( int m_winWidth )
             grid->addWidget(m_line, m_row, m_col, 1, m_cols, Qt::AlignVCenter);
             m_row++;
         }
-        this->addTab(t, tabName);
+
+        int index = this->addTab(t, tabName);
+        if ( ( qec.id & 0xffff0000 ) == V4L2_CTRL_CLASS_CAMERA )
+           cameraTabIndex = index;
+
         for (i = 0; i < iter->second.size(); i++) {
             if (i & 1)
                 id = iter->second[(1+iter->second.size()) / 2 + i / 2];
@@ -153,6 +158,7 @@ void CameraSettings::setUpCameraControlTabs( int m_winWidth )
         }
         grid = new QGridLayout(w);
         finishGrid(grid, which);
+        setCurrentIndex( cameraTabIndex );
     }
 }
 
