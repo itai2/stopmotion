@@ -133,7 +133,7 @@ void MainWindow::setCamera( QCameraInfo selected, QSize resolution )
     setResolution( resolution );
 
     _cameraSettings.reset( new CameraSettings( ui->_cameraSettingsHolder ) );
-    _cameraSettings->setUpCameraControlTabs( ui->_cameraSettingsHolder->width() );
+    _cameraSettings->setDevice( "/dev/video0", false );
 }
 
 void MainWindow::on_action_SelectResolution_triggered()

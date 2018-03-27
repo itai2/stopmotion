@@ -9,6 +9,7 @@
 #include <QGridLayout>
 #include <QLabel>
 #include <QSignalMapper>
+#include <QSocketNotifier>
 
 class CameraSettings :
         public QTabWidget,
@@ -16,10 +17,11 @@ class CameraSettings :
 {
 public:
     CameraSettings( QWidget *parent );
-    void setUpCameraControlTabs( int m_winWidth );
     ~CameraSettings();
+    void setDevice(const QString &device, bool rawOpen);
 private slots:
     void ctrlAction(int id);
+    void ctrlEvent();
 private:
 
     typedef std::vector<unsigned> ClassIDVec;
@@ -38,6 +40,7 @@ private:
     WidgetMap m_widgetMap;
     WidgetMap m_sliderMap;
     QSignalMapper *m_sigMapper;
+    QSocketNotifier *m_ctrlNotifier;
 
     static bool is_valid_type(quint32 type);
     void addCtrl(QGridLayout *grid, const v4l2_query_ext_ctrl &qec);
@@ -60,13 +63,15 @@ private:
     void setWhat(QWidget *w, unsigned id, const QString &v);
     void setWhat(QWidget *w, unsigned id, long long v);
     QString getCtrlFlags(unsigned flags);
-    void setDevice(const QString &device, bool rawOpen);
     void closeDevice();
     void setDefaults(unsigned which);
     void updateCtrl(unsigned id);
     long long getVal64(unsigned id);
     QString getString(unsigned id);
     int getVal(unsigned id);
+    void subscribeCtrlEvents();
+    void updateCtrlRange(unsigned id, __s32 new_val);
+    void setUpCameraControlTabs( int m_winWidth );
 };
 
 #endif // CAMERASETTINGS_H

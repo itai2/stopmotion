@@ -29,7 +29,8 @@ CameraSettings::CameraSettings( QWidget *parent )
       m_vMargin(15),
       m_hMargin(5),
       m_pxw(25),
-      m_sigMapper( 0 )
+      m_sigMapper( 0 ),
+      m_ctrlNotifier( 0 )
 {
 }
 
@@ -57,9 +58,6 @@ bool CameraSettings::is_valid_type(quint32 type)
 
 void CameraSettings::setUpCameraControlTabs( int m_winWidth )
 {
-
-    setDevice( "/dev/video0", false);
-
     v4l2_query_ext_ctrl qec;
     memset( &qec, 0, sizeof(qec) );
 
@@ -667,7 +665,6 @@ void CameraSettings::setDevice(const QString &device, bool rawOpen)
 {
     closeDevice();
     m_sigMapper = new QSignalMapper(this);
-//    connect(m_sigMapper, SIGNAL(mapped(int)), this, SLOT(ctrlAction(int)));
     connect(m_sigMapper,
             static_cast<void (QSignalMapper::*)(int)>(&QSignalMapper::mapped),
             this,
@@ -676,19 +673,45 @@ void CameraSettings::setDevice(const QString &device, bool rawOpen)
     s_direct(rawOpen);
 
     if (open(device.toLatin1(), true) < 0) {
-        qDebug() << "Cannot open device " << device;
         return;
+    }
+
+    setUpCameraControlTabs( parentWidget()->width() );
+    if (QWidget *current = this->currentWidget()) {
+        current->show();
+    }
+    this->show();
+    this->setFocus();
+    subscribeCtrlEvents();
+    m_ctrlNotifier = new QSocketNotifier(g_fd(), QSocketNotifier::Exception, this );
+    if ( !connect(m_ctrlNotifier,
+            &QSocketNotifier::activated,
+            this,
+            &CameraSettings::ctrlEvent ) )
+    {
+        qDebug() << "Connect failed for notifier";
     }
 }
 
 void CameraSettings::closeDevice()
 {
-    if ( m_sigMapper )
-        delete m_sigMapper;
+    delete m_sigMapper;
     m_sigMapper = NULL;
     if (g_fd() >= 0) {
+        if (m_ctrlNotifier) {
+            delete m_ctrlNotifier;
+            m_ctrlNotifier = NULL;
+        }
         cv4l_fd::close();
     }
+    while (QWidget *page = this->widget(0)) {
+        this->removeTab(0);
+        delete page;
+    }
+    m_ctrlMap.clear();
+    m_widgetMap.clear();
+    m_sliderMap.clear();
+    m_classMap.clear();
 }
 
 void CameraSettings::ctrlAction(int id)
@@ -904,4 +927,119 @@ int CameraSettings::getVal(unsigned id)
     }
     setWhat(w, id, v);
     return v;
+}
+
+void CameraSettings::ctrlEvent()
+{
+    v4l2_event ev;
+
+    while (dqevent(ev) == 0) {
+        if (ev.type == V4L2_EVENT_SOURCE_CHANGE) {
+            qDebug() << "!!!Source Cahnge!!!";
+            //m_genTab->sourceChange(ev);
+            continue;
+        }
+        if (ev.type != V4L2_EVENT_CTRL)
+            continue;
+        m_ctrlMap[ev.id].flags = ev.u.ctrl.flags;
+        m_ctrlMap[ev.id].minimum = ev.u.ctrl.minimum;
+        m_ctrlMap[ev.id].maximum = ev.u.ctrl.maximum;
+        m_ctrlMap[ev.id].step = ev.u.ctrl.step;
+        m_ctrlMap[ev.id].default_value = ev.u.ctrl.default_value;
+
+        bool disabled = m_ctrlMap[ev.id].flags & CTRL_FLAG_DISABLED;
+
+        if (qobject_cast<QLineEdit *>(m_widgetMap[ev.id]))
+            static_cast<QLineEdit *>(m_widgetMap[ev.id])->setReadOnly(disabled);
+        else
+            m_widgetMap[ev.id]->setDisabled(disabled);
+        if (m_sliderMap.find(ev.id) != m_sliderMap.end())
+            m_sliderMap[ev.id]->setDisabled(disabled);
+        if (ev.u.ctrl.changes & V4L2_EVENT_CTRL_CH_RANGE)
+            updateCtrlRange(ev.id, ev.u.ctrl.value);
+        switch (m_ctrlMap[ev.id].type) {
+        case V4L2_CTRL_TYPE_INTEGER:
+        case V4L2_CTRL_TYPE_INTEGER_MENU:
+        case V4L2_CTRL_TYPE_MENU:
+        case V4L2_CTRL_TYPE_BOOLEAN:
+        case V4L2_CTRL_TYPE_BITMASK:
+            setVal(ev.id, ev.u.ctrl.value);
+            break;
+        case V4L2_CTRL_TYPE_INTEGER64:
+            setVal64(ev.id, ev.u.ctrl.value64);
+            break;
+        default:
+            break;
+        }
+        if (m_ctrlMap[ev.id].type != V4L2_CTRL_TYPE_STRING)
+            continue;
+        query_ext_ctrl(m_ctrlMap[ev.id]);
+
+        struct v4l2_ext_control c;
+        struct v4l2_ext_controls ctrls;
+
+        c.id = ev.id;
+        c.size = m_ctrlMap[ev.id].maximum + 1;
+        c.string = (char *)malloc(c.size);
+        memset(&ctrls, 0, sizeof(ctrls));
+        ctrls.count = 1;
+        ctrls.ctrl_class = 0;
+        ctrls.controls = &c;
+        if (!g_ext_ctrls(ctrls))
+            setString(ev.id, c.string);
+        free(c.string);
+    }
+}
+
+void CameraSettings::subscribeCtrlEvents()
+{
+    for (ClassMap::iterator iter = m_classMap.begin(); iter != m_classMap.end(); ++iter) {
+        for (unsigned i = 0; i < m_classMap[iter->first].size(); i++) {
+            unsigned id = m_classMap[iter->first][i];
+            struct v4l2_event_subscription sub;
+
+            memset(&sub, 0, sizeof(sub));
+            sub.type = V4L2_EVENT_CTRL;
+            sub.id = id;
+            int result = subscribe_event(sub);
+            qDebug() << "subscribe result = " << result;
+        }
+    }
+}
+
+void CameraSettings::updateCtrlRange(unsigned id, __s32 new_val)
+{
+    const v4l2_query_ext_ctrl &qec = m_ctrlMap[id];
+    QLineEdit *edit;
+    QIntValidator *val;
+    unsigned dif;
+
+    switch (qec.type) {
+    case V4L2_CTRL_TYPE_INTEGER:
+        dif = qec.maximum - qec.minimum;
+        if (dif <= 0xffffU || (qec.flags & V4L2_CTRL_FLAG_SLIDER)) {
+            QSlider *slider = static_cast<QSlider *>(m_sliderMap[id]);
+            slider->setMinimum(qec.minimum);
+            slider->setMaximum(qec.maximum);
+            slider->setSingleStep(qec.step);
+            slider->setSliderPosition(new_val);
+
+            QSpinBox *spin = static_cast<QSpinBox *>(m_widgetMap[id]);
+            spin->setRange(qec.minimum, qec.maximum);
+            spin->setSingleStep(qec.step);
+            spin->setValue(new_val);
+            break;
+        }
+
+        edit = static_cast<QLineEdit *>(m_widgetMap[id]);
+        val = new QIntValidator(qec.minimum, qec.maximum, edit->parent());
+        // FIXME: will this delete the old validator?
+        edit->setValidator(val);
+        break;
+
+    case V4L2_CTRL_TYPE_STRING:
+        QLineEdit *edit = static_cast<QLineEdit *>(m_widgetMap[id]);
+        edit->setMaxLength(qec.maximum);
+        break;
+    }
 }

@@ -1378,7 +1378,7 @@ static inline int v4l_queue_create_bufs(struct v4l_fd *f,
 }
 
 static inline int v4l_queue_mmap_bufs(struct v4l_fd *f,
-		struct v4l_queue *q, unsigned from)
+                struct v4l_queue *q, unsigned /*from*/)
 {
 	unsigned b, p;
 
@@ -1430,8 +1430,8 @@ static inline int v4l_queue_munmap_bufs(struct v4l_fd *f, struct v4l_queue *q)
 	return 0;
 }
 
-static inline int v4l_queue_alloc_bufs(struct v4l_fd *f,
-		struct v4l_queue *q, unsigned from)
+static inline int v4l_queue_alloc_bufs(struct v4l_fd */*f*/,
+                struct v4l_queue *q, unsigned /*from*/)
 {
 	unsigned b, p;
 
