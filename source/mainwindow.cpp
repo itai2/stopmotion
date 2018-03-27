@@ -3,6 +3,7 @@
 #include "ui_mainwindow.h"
 #include <QCameraInfo>
 #include <QFileDialog>
+#include <QDebug>
 
 void MainWindow::setWorkingDir( const QString &dir )
 {
@@ -133,7 +134,7 @@ void MainWindow::setCamera( QCameraInfo selected, QSize resolution )
     setResolution( resolution );
 
     _cameraSettings.reset( new CameraSettings( ui->_cameraSettingsHolder ) );
-    _cameraSettings->setDevice( "/dev/video0", false );
+    _cameraSettings->setDevice( selected.deviceName(), false );
 }
 
 void MainWindow::on_action_SelectResolution_triggered()

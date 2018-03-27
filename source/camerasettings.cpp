@@ -1001,8 +1001,7 @@ void CameraSettings::subscribeCtrlEvents()
             memset(&sub, 0, sizeof(sub));
             sub.type = V4L2_EVENT_CTRL;
             sub.id = id;
-            int result = subscribe_event(sub);
-            qDebug() << "subscribe result = " << result;
+            subscribe_event(sub);
         }
     }
 }
