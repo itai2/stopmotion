@@ -51,6 +51,12 @@
        <layout class="QVBoxLayout" name="verticalLayout_2" stretch="1,0">
         <item>
          <widget class="QLabel" name="_movie">
+          <property name="minimumSize">
+           <size>
+            <width>483</width>
+            <height>230</height>
+           </size>
+          </property>
           <property name="text">
            <string>TextLabel</string>
           </property>

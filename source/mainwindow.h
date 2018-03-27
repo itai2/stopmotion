@@ -63,6 +63,7 @@ private:
 
     //manual ui
     QScopedPointer<CameraSettings> _cameraSettings;
+    void resizeEvent(QResizeEvent *event);
 };
 
 #endif // MAINWINDOW_H

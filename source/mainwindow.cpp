@@ -202,7 +202,6 @@ void MainWindow::setMovieImage(int frame)
 
 void MainWindow::setMovieImage(const QPixmap &image)
 {
-    qDebug() << __FUNCTION__ << "w: " << ui->_movie->width() << ", h: " << ui->_movie->height();
     ui->_movie->setPixmap( image.scaled( ui->_movie->width(),
                                          ui->_movie->height(),
                                          Qt::KeepAspectRatio ) );
@@ -212,4 +211,9 @@ void MainWindow::setMovieImage(const QPixmap &image)
 void MainWindow::on_actionExit_triggered()
 {
     QCoreApplication::quit();
+}
+
+void MainWindow::resizeEvent(QResizeEvent */*event*/)
+{
+    setMovieImage( *ui->_movie->pixmap() );
 }
