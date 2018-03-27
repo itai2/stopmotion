@@ -49,7 +49,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->_frameTimeMs->setRange( 1, 10000 );
     ui->_frameTimeMs->setValue( frameTimeMs );
     connect( ui->_frameTimeMs,
-             static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged),
+             QOverload<int>::of(&QSpinBox::valueChanged),
              [this] (int newValue ) {_settings.setValue( "frame_time_ms", newValue ); } );
 
     setMovieImage( 1 );
@@ -133,7 +133,8 @@ void MainWindow::setCamera( QCameraInfo selected, QSize resolution )
     _settings.setValue( "camera", _currentCameraInfo.description() );
     setResolution( resolution );
 
-    _cameraSettings.reset( new CameraSettings( ui->_cameraSettingsHolder ) );
+    _cameraSettings.reset( new CameraSettings( ui->centralWidget ) );
+    ui->_cameraSettingsLayout->addWidget( _cameraSettings.data() );
     _cameraSettings->setDevice( selected.deviceName(), false );
 }
 
