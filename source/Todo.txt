@@ -1,10 +1,6 @@
 - space bar should capture
-- adjust list size to the icons V
-- check if we can capture in different resolution than viewfinder (no)
-- play a video
-- inset in the middle
+- insert in the middle
 - delete from the middle
-- maybe capture with opencv
 
 
 qv4l2 -V /dev/video1 (from v4l-utils) does a very good job!
