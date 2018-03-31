@@ -2,6 +2,13 @@
 - insert in the middle
 - delete from the middle
 
+
+- opacity:
+look at the test_transparent project. Maybe use the graphics view....
+
+
+
+
 - opacity:
   _effect = new QGraphicsOpacityEffect(this);
   ui->_play->setGraphicsEffect(_effect);
