@@ -9,6 +9,8 @@
 for showing last image on to of the camera viewfiner
 
 Maybe use QStackedLayout with StackingMode set to QStackedLayout::StackAll.
+manually edit th eui file?
+
 
 qv4l2 -V /dev/video1 (from v4l-utils) does a very good job!
 we set with it and then stop and goto our app
