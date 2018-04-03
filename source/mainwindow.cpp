@@ -77,14 +77,14 @@ void MainWindow::setTopQuality()
 
 QStringList MainWindow::getAllImages( QDir::SortFlags flags) const
 {
-    return QDir( _workingDir ).entryList( QStringList( "*.jpg" ),
+    return QDir( _workingDir ).entryList( QStringList( "sm*.jpg" ),
                                           QDir::Files,
                                           flags );
 }
 
 QString MainWindow::getImageFilePath(int imageNumber) const
 {
-    QString result =  QDir( _workingDir ).absoluteFilePath( QString( "%1.jpg" ).arg( imageNumber,
+    QString result =  QDir( _workingDir ).absoluteFilePath( QString( "sm%1.jpg" ).arg( imageNumber,
                                                                                      8,
                                                                                      10,
                                                                                      QChar('0') ) );
@@ -93,7 +93,7 @@ QString MainWindow::getImageFilePath(int imageNumber) const
 
 QString MainWindow::getTempImageFilePath(int imageNumber) const
 {
-    QString result =  QDir( _workingDir ).absoluteFilePath( QString( "%1.jpg.tmp" ).arg( imageNumber,
+    QString result =  QDir( _workingDir ).absoluteFilePath( QString( "%1.tmp.jpg" ).arg( imageNumber,
                                                                                          8,
                                                                                          10,
                                                                                          QChar('0') ) );
@@ -290,11 +290,12 @@ QModelIndex MainWindow::pasteModelIndex() const
 
 void MainWindow::createGap( int startIndex, int numImages )
 {
-    int lastIndex = getNumFiles();
+    int lastIndex = getNumFiles() - 1;
     for ( int i = lastIndex; i > startIndex; -- i )
     {
         QString oldName = getImageFilePath( i + 1 );
-        QString newName = getImageFilePath( i + 1 + numImages );
+        int newIndex = i + numImages;
+        QString newName = getImageFilePath( newIndex + 1 );
         QFile::rename( oldName, newName );
     }
 }
