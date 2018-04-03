@@ -11,7 +11,7 @@ void MainWindow::setWorkingDir( const QString &dir )
     _settings.setValue( "working_dir", _workingDir );
     ui->_workingDirLabel->setText( _workingDir );
     setCurrentFileNumber();
-    setupImageList();
+    reArrangeFiles();
 }
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -85,10 +85,11 @@ QStringList MainWindow::getAllImages( QDir::SortFlags flags)
 
 QString MainWindow::getImageFilePath(int imageNumber) const
 {
-    return QDir( _workingDir ).absoluteFilePath( QString( "%1" ).arg( imageNumber,
-                                                                      8,
-                                                                      10,
-                                                                      QChar('0') ) );
+    QString result =  QDir( _workingDir ).absoluteFilePath( QString( "%1.jpg" ).arg( imageNumber,
+                                                                                 8,
+                                                                                 10,
+                                                                                 QChar('0') ) );
+    return result;
 }
 
 void MainWindow::setCurrentFileNumber()
@@ -100,7 +101,7 @@ void MainWindow::setCurrentFileNumber()
         _currentFileNumber = QFileInfo( allImages[0] ).baseName().toInt() + 1;
 }
 
-void MainWindow::setupImageList()
+void MainWindow::fillImageList()
 {
     ui->_imageIconList->clear();
     ui->_imageIconList->setIconSize( QSize( 160, 90 ) );
@@ -110,7 +111,7 @@ void MainWindow::setupImageList()
     for ( auto &imageFileName : allImages )
     {
         auto filePath = QDir( _workingDir ).absoluteFilePath( imageFileName );
-        new QListWidgetItem( QIcon( filePath ), filePath, ui->_imageIconList );
+        new QListWidgetItem( QIcon( filePath ), QString(), ui->_imageIconList );
     }
 }
 
@@ -222,5 +223,31 @@ void MainWindow::resizeEvent(QResizeEvent */*event*/)
 void MainWindow::on__delImage_clicked()
 {
     auto selection = ui->_imageIconList->selectionModel()->selectedIndexes();
-    qDebug() << "selection: " << selection;
+    if ( selection.size() > 0 )
+        deleteImages( selection.first().row(), selection.last().row() );
+}
+
+void MainWindow::deleteImages( int fromIndex, int toIndex )
+{
+    for ( int i = fromIndex; i <= toIndex; ++ i )
+    {
+        QString toRemove = getImageFilePath( i + 1 );
+        qDebug() << "Removing: " << toRemove;
+        QFile::remove( toRemove );
+    }
+    reArrangeFiles();
+}
+
+void MainWindow::reArrangeFiles()
+{
+    auto allImages = getAllImages( QDir::Name );
+    for( int i = 0; i < allImages.size(); ++ i )
+    {
+        auto shouldBe = getImageFilePath( i + 1 );
+        auto current = QDir( _workingDir ).absoluteFilePath( allImages[i] );
+        if ( shouldBe != current )
+            QFile::rename( current, shouldBe );
+    }
+    _currentFileNumber = allImages.size() + 1;
+    fillImageList();
 }

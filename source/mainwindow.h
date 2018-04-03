@@ -56,7 +56,7 @@ private:
     void setTopQuality();
 
     void setCurrentFileNumber();
-    void setupImageList();
+    void fillImageList();
     QStringList getAllImages(QDir::SortFlags flags);
     QString getImageFilePath( int imageNumber ) const;
 
@@ -66,6 +66,8 @@ private:
     //manual ui
     QScopedPointer<CameraSettings> _cameraSettings;
     void resizeEvent(QResizeEvent *event);
+    void deleteImages(int fromIndex, int toIndex);
+    void reArrangeFiles();
 };
 
 #endif // MAINWINDOW_H
