@@ -1,6 +1,7 @@
 - space bar should capture
-- insert in the middle
-- delete from the middle
+
+
+fix delete! close the gap!
 
 
 - opacity:

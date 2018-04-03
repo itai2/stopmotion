@@ -191,7 +191,6 @@ void MainWindow::imageSaved( int /*id*/, const QString &/*fileName*/ )
 
     createGap( pastePlace, 1 );
     insertImages( pastePlace, 1 );
-    reArrangeFiles();
     ui->_imageIconList->setCurrentRow( pastePlace + 1 );
 
     if ( newScollPosition.isValid() )
@@ -251,7 +250,12 @@ void MainWindow::deleteImages( int fromIndex, int toIndex )
         qDebug() << "Removing: " << toRemove;
         QFile::remove( toRemove );
     }
-    reArrangeFiles();
+
+    for ( int i = fromIndex; i <= toIndex; ++ i )
+    {
+        QListWidgetItem *removed = ui->_imageIconList->takeItem( fromIndex );
+        delete removed;
+    }
 }
 
 void MainWindow::reArrangeFiles()
@@ -297,6 +301,10 @@ void MainWindow::createGap( int startIndex, int numImages )
         int newIndex = i + numImages;
         QString newName = getImageFilePath( newIndex + 1 );
         QFile::rename( oldName, newName );
+        if ( newIndex > lastIndex )
+            new QListWidgetItem( QIcon( newName ), QString(), ui->_imageIconList );
+        else
+            ui->_imageIconList->item( newIndex )->setIcon( QIcon( newName ) );
     }
 }
 
@@ -314,11 +322,18 @@ void MainWindow::copyImages( int startIndex )
 
 void MainWindow::insertImages( int startIndex, int numImages )
 {
+    int lastIndex = getNumFiles() - 1;
+
     for ( int i = 0; i < numImages; ++ i )
     {
-        QString fromName = getTempImageFilePath( i + startIndex + 2 );
-        QString toName = getImageFilePath( i + startIndex + 2 );
+        int index = i + startIndex + 1;
+        QString fromName = getTempImageFilePath( index + 1 );
+        QString toName = getImageFilePath( index + 1 );
         QFile::rename( fromName, toName );
+        if ( index > lastIndex )
+            new QListWidgetItem( QIcon( toName ), QString(), ui->_imageIconList );
+        else
+            ui->_imageIconList->item( index )->setIcon( QIcon( toName ) );
     }
 }
 
@@ -329,5 +344,4 @@ void MainWindow::on__pasteImage_clicked()
     copyImages( where );
     createGap( where, numImages );
     insertImages( where, numImages );
-    reArrangeFiles();
 }
