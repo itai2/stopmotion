@@ -78,6 +78,7 @@ private:
     void copyImages(int startIndex);
     QString getTempImageFilePath(int imageNumber) const;
     void insertImages(int startIndex, int numImages);
+    QModelIndex pasteModelIndex() const;
 };
 
 #endif // MAINWINDOW_H

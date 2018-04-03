@@ -180,14 +180,25 @@ void MainWindow::on__captureButton_clicked()
         return;
 
     ui->_captureButton->setEnabled( false );
-    QString filePath = getImageFilePath( getNumFiles() + 1 );
+    QString filePath = getTempImageFilePath( pasteIndex() + 2 );
     _capture->capture( filePath );
 }
 
-void MainWindow::imageSaved( int /*id*/, const QString &fileName )
+void MainWindow::imageSaved( int /*id*/, const QString &/*fileName*/ )
 {
-    ui->_imageIconList->addItem( new QListWidgetItem( QIcon( fileName ), QString() ) );
-    ui->_imageIconList->scrollToBottom();
+    int pastePlace = pasteIndex();
+    auto newScollPosition = pasteModelIndex();
+
+    createGap( pastePlace, 1 );
+    insertImages( pastePlace, 1 );
+    reArrangeFiles();
+    ui->_imageIconList->setCurrentRow( pastePlace + 1 );
+
+    if ( newScollPosition.isValid() )
+        ui->_imageIconList->scrollTo( newScollPosition );
+    else
+        ui->_imageIconList->scrollToBottom();
+
     ui->_captureButton->setEnabled( true );
     ui->_captureButton->setFocus();
 }
@@ -263,10 +274,18 @@ void MainWindow::on__copyImage_clicked()
 
 int MainWindow::pasteIndex() const
 {
+    auto index = pasteModelIndex();
+    if ( index.isValid() )
+        return index.row();
+    return getNumFiles() - 1;
+}
+
+QModelIndex MainWindow::pasteModelIndex() const
+{
     auto selection = ui->_imageIconList->selectionModel()->selectedIndexes();
     if ( selection.size() > 0 )
-        return selection.last().row();
-    return getNumFiles() - 1;
+        return selection.last();
+    return QModelIndex();
 }
 
 void MainWindow::createGap( int startIndex, int numImages )
