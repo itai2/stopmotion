@@ -10,7 +10,6 @@ void MainWindow::setWorkingDir( const QString &dir )
     _workingDir = dir;
     _settings.setValue( "working_dir", _workingDir );
     ui->_workingDirLabel->setText( _workingDir );
-    setCurrentFileNumber();
     reArrangeFiles();
 }
 
@@ -76,7 +75,7 @@ void MainWindow::setTopQuality()
     _capture->setEncodingSettings( encodingSettings );
 }
 
-QStringList MainWindow::getAllImages( QDir::SortFlags flags)
+QStringList MainWindow::getAllImages( QDir::SortFlags flags) const
 {
     return QDir( _workingDir ).entryList( QStringList( "*.jpg" ),
                                           QDir::Files,
@@ -92,13 +91,9 @@ QString MainWindow::getImageFilePath(int imageNumber) const
     return result;
 }
 
-void MainWindow::setCurrentFileNumber()
+int MainWindow::getNumFiles() const
 {
-    auto allImages = getAllImages( QDir::Name | QDir::Reversed );
-    if ( allImages.isEmpty() )
-        _currentFileNumber = 1;
-    else
-        _currentFileNumber = QFileInfo( allImages[0] ).baseName().toInt() + 1;
+    return getAllImages( QDir::Unsorted ).count();
 }
 
 void MainWindow::fillImageList()
@@ -176,14 +171,13 @@ void MainWindow::on__captureButton_clicked()
         return;
 
     ui->_captureButton->setEnabled( false );
-    QString filePath = getImageFilePath( _currentFileNumber );
+    QString filePath = getImageFilePath( getNumFiles() + 1 );
     _capture->capture( filePath );
 }
 
 void MainWindow::imageSaved( int /*id*/, const QString &fileName )
 {
-    ++ _currentFileNumber;
-    ui->_imageIconList->addItem( new QListWidgetItem( QIcon( fileName ), fileName ) );
+    ui->_imageIconList->addItem( new QListWidgetItem( QIcon( fileName ), QString() ) );
     ui->_imageIconList->scrollToBottom();
     ui->_captureButton->setEnabled( true );
     ui->_captureButton->setFocus();
@@ -191,8 +185,10 @@ void MainWindow::imageSaved( int /*id*/, const QString &fileName )
 
 void MainWindow::on__play_clicked()
 {
-    _movieTimeLine->setDuration( ( _currentFileNumber - 1 ) * ui->_frameTimeMs->value() );
-    _movieTimeLine->setFrameRange( 1, _currentFileNumber - 1 );
+    int numFiles = getNumFiles();
+
+    _movieTimeLine->setDuration( ( numFiles ) * ui->_frameTimeMs->value() );
+    _movieTimeLine->setFrameRange( 1, numFiles );
     _movieTimeLine->start();
 }
 
@@ -248,6 +244,5 @@ void MainWindow::reArrangeFiles()
         if ( shouldBe != current )
             QFile::rename( current, shouldBe );
     }
-    _currentFileNumber = allImages.size() + 1;
     fillImageList();
 }

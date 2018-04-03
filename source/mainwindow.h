@@ -46,7 +46,6 @@ private:
     QScopedPointer<QCameraImageCapture> _capture;
     QSettings _settings;
     QString _workingDir;
-    int _currentFileNumber;
 
     QTimeLine *_movieTimeLine;
 
@@ -55,9 +54,9 @@ private:
     void setWorkingDir( const QString &dir );
     void setTopQuality();
 
-    void setCurrentFileNumber();
+    int getNumFiles() const;
     void fillImageList();
-    QStringList getAllImages(QDir::SortFlags flags);
+    QStringList getAllImages(QDir::SortFlags flags) const;
     QString getImageFilePath( int imageNumber ) const;
 
     //overide events
