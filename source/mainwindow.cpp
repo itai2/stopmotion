@@ -109,7 +109,8 @@ void MainWindow::setupImageList()
     auto allImages = getAllImages( QDir::Name );
     for ( auto &imageFileName : allImages )
     {
-        new QListWidgetItem( QIcon( QDir( _workingDir ).absoluteFilePath( imageFileName ) ), QString(), ui->_imageIconList );
+        auto filePath = QDir( _workingDir ).absoluteFilePath( imageFileName );
+        new QListWidgetItem( QIcon( filePath ), filePath, ui->_imageIconList );
     }
 }
 
@@ -181,7 +182,7 @@ void MainWindow::on__captureButton_clicked()
 void MainWindow::imageSaved( int /*id*/, const QString &fileName )
 {
     ++ _currentFileNumber;
-    ui->_imageIconList->addItem( new QListWidgetItem( QIcon( fileName ), QString() ) );
+    ui->_imageIconList->addItem( new QListWidgetItem( QIcon( fileName ), fileName ) );
     ui->_imageIconList->scrollToBottom();
     ui->_captureButton->setEnabled( true );
     ui->_captureButton->setFocus();
@@ -216,4 +217,10 @@ void MainWindow::on_actionExit_triggered()
 void MainWindow::resizeEvent(QResizeEvent */*event*/)
 {
     setMovieImage( *ui->_movie->pixmap() );
+}
+
+void MainWindow::on__delImage_clicked()
+{
+    auto selection = ui->_imageIconList->selectionModel()->selectedIndexes();
+    qDebug() << "selection: " << selection;
 }

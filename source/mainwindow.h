@@ -36,6 +36,8 @@ private slots:
 
     void on_actionExit_triggered();
 
+    void on__delImage_clicked();
+
 private:
     Ui::MainWindow *ui;
     QScopedPointer<QCamera> _camera;
