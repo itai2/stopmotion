@@ -11,6 +11,7 @@
 #include <QScopedPointer>
 #include <QSettings>
 #include <QTimeLine>
+#include <QModelIndexList>
 
 namespace Ui {
 class MainWindow;
@@ -38,6 +39,10 @@ private slots:
 
     void on__delImage_clicked();
 
+    void on__copyImage_clicked();
+
+    void on__pasteImage_clicked();
+
 private:
     Ui::MainWindow *ui;
     QScopedPointer<QCamera> _camera;
@@ -48,6 +53,7 @@ private:
     QString _workingDir;
 
     QTimeLine *_movieTimeLine;
+    QModelIndexList _copiedList;
 
     void setResolution( QSize res );
     void setCamera( QCameraInfo selected, QSize resolution );
@@ -67,6 +73,11 @@ private:
     void resizeEvent(QResizeEvent *event);
     void deleteImages(int fromIndex, int toIndex);
     void reArrangeFiles();
+    int pasteIndex() const;
+    void createGap(int startIndex, int numImages);
+    void copyImages(int startIndex);
+    QString getTempImageFilePath(int imageNumber) const;
+    void insertImages(int startIndex, int numImages);
 };
 
 #endif // MAINWINDOW_H

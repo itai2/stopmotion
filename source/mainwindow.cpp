@@ -85,9 +85,18 @@ QStringList MainWindow::getAllImages( QDir::SortFlags flags) const
 QString MainWindow::getImageFilePath(int imageNumber) const
 {
     QString result =  QDir( _workingDir ).absoluteFilePath( QString( "%1.jpg" ).arg( imageNumber,
-                                                                                 8,
-                                                                                 10,
-                                                                                 QChar('0') ) );
+                                                                                     8,
+                                                                                     10,
+                                                                                     QChar('0') ) );
+    return result;
+}
+
+QString MainWindow::getTempImageFilePath(int imageNumber) const
+{
+    QString result =  QDir( _workingDir ).absoluteFilePath( QString( "%1.jpg.tmp" ).arg( imageNumber,
+                                                                                         8,
+                                                                                         10,
+                                                                                         QChar('0') ) );
     return result;
 }
 
@@ -245,4 +254,60 @@ void MainWindow::reArrangeFiles()
             QFile::rename( current, shouldBe );
     }
     fillImageList();
+}
+
+void MainWindow::on__copyImage_clicked()
+{
+    _copiedList = ui->_imageIconList->selectionModel()->selectedIndexes();
+}
+
+int MainWindow::pasteIndex() const
+{
+    auto selection = ui->_imageIconList->selectionModel()->selectedIndexes();
+    if ( selection.size() > 0 )
+        return selection.last().row();
+    return getNumFiles() - 1;
+}
+
+void MainWindow::createGap( int startIndex, int numImages )
+{
+    int lastIndex = getNumFiles();
+    for ( int i = lastIndex; i > startIndex; -- i )
+    {
+        QString oldName = getImageFilePath( i + 1 );
+        QString newName = getImageFilePath( i + 1 + numImages );
+        QFile::rename( oldName, newName );
+    }
+}
+
+void MainWindow::copyImages( int startIndex )
+{
+    int currentIndex = startIndex;
+    for ( auto index : _copiedList )
+    {
+        QString fromName = getImageFilePath( index.row() + 1 );
+        QString toName = getTempImageFilePath( currentIndex + 2 );
+        QFile::copy( fromName, toName );
+        ++ currentIndex;
+    }
+}
+
+void MainWindow::insertImages( int startIndex, int numImages )
+{
+    for ( int i = 0; i < numImages; ++ i )
+    {
+        QString fromName = getTempImageFilePath( i + startIndex + 2 );
+        QString toName = getImageFilePath( i + startIndex + 2 );
+        QFile::rename( fromName, toName );
+    }
+}
+
+void MainWindow::on__pasteImage_clicked()
+{
+    int where = pasteIndex();
+    int numImages = _copiedList.size();
+    copyImages( where );
+    createGap( where, numImages );
+    insertImages( where, numImages );
+    reArrangeFiles();
 }
