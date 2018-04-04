@@ -4,6 +4,7 @@
 #include <QCameraInfo>
 #include <QFileDialog>
 #include <QDebug>
+#include <QShortcut>
 
 void MainWindow::setWorkingDir( const QString &dir )
 {
@@ -53,6 +54,14 @@ MainWindow::MainWindow(QWidget *parent) :
              [this] (int newValue ) {_settings.setValue( "frame_time_ms", newValue ); } );
 
     setMovieImage( 1 );
+    createShortcuts();
+}
+
+void MainWindow::createShortcuts()
+{
+    auto spaceKey = new QShortcut( QKeySequence( Qt::Key_Space ), this );
+    connect( spaceKey, &QShortcut::activated, [this] () { ui->_captureButton->clicked(); } );
+//    connect( spaceKey, &QShortcut::activated, this, &MainWindow::on__captureButton_clicked );
 }
 
 MainWindow::~MainWindow()

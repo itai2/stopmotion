@@ -82,6 +82,7 @@ private:
     void moveBack(int startIndex, int gap);
     bool moveFile(const QString &from, const QString &to);
     bool copyFile(const QString &from, const QString &to);
+    void createShortcuts();
 };
 
 #endif // MAINWINDOW_H
