@@ -39,6 +39,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->_captureButton->setFocus();
 
     _movieTimeLine = new QTimeLine( 0 ,this );
+    _movieTimeLine->setCurveShape( QTimeLine::LinearCurve );
     connect( _movieTimeLine,
              &QTimeLine::frameChanged,
              this,
@@ -110,7 +111,6 @@ void MainWindow::fillImageList()
     ui->_imageIconList->clear();
     ui->_imageIconList->setIconSize( QSize( 160, 90 ) );
     ui->_imageIconList->setFixedWidth( ui->_imageIconList->iconSize().width() + 30 );
-    qDebug() << "Icon size is " << ui->_imageIconList->iconSize();
     auto allImages = getAllImages( QDir::Name );
     for ( auto &imageFileName : allImages )
     {
@@ -198,6 +198,7 @@ void MainWindow::imageSaved( int /*id*/, const QString &/*fileName*/ )
     else
         ui->_imageIconList->scrollToBottom();
 
+    ui->_imageIconList->clearSelection();
     ui->_captureButton->setEnabled( true );
     ui->_captureButton->setFocus();
 }
@@ -354,6 +355,7 @@ void MainWindow::on__pasteImage_clicked()
     copyImages( where );
     createGap( where, numImages );
     insertImages( where, numImages );
+    ui->_imageIconList->clearSelection();
 }
 
 bool MainWindow::moveFile( const QString &from, const QString &to )
