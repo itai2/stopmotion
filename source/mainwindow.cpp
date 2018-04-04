@@ -59,9 +59,12 @@ MainWindow::MainWindow(QWidget *parent) :
 
 void MainWindow::createShortcuts()
 {
-    auto spaceKey = new QShortcut( QKeySequence( Qt::Key_Space ), this );
-    connect( spaceKey, &QShortcut::activated, [this] () { ui->_captureButton->clicked(); } );
-//    connect( spaceKey, &QShortcut::activated, this, &MainWindow::on__captureButton_clicked );
+    connect( new QShortcut( QKeySequence( Qt::Key_Space ), this ),
+             &QShortcut::activated,
+             [this] () { ui->_captureButton->clicked(); } );
+    connect( new QShortcut( QKeySequence( Qt::Key_Delete ), this ),
+             &QShortcut::activated,
+             [this] () { ui->_delImage->clicked(); } );
 }
 
 MainWindow::~MainWindow()
