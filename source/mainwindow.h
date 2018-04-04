@@ -79,6 +79,9 @@ private:
     QString getTempImageFilePath(int imageNumber) const;
     void insertImages(int startIndex, int numImages);
     QModelIndex pasteModelIndex() const;
+    void moveBack(int startIndex, int gap);
+    bool moveFile(const QString &from, const QString &to);
+    bool copyFile(const QString &from, const QString &to);
 };
 
 #endif // MAINWINDOW_H

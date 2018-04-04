@@ -239,23 +239,12 @@ void MainWindow::on__delImage_clicked()
 {
     auto selection = ui->_imageIconList->selectionModel()->selectedIndexes();
     if ( selection.size() > 0 )
-        deleteImages( selection.first().row(), selection.last().row() );
+        deleteImages( selection.first().row(), selection.size() );
 }
 
-void MainWindow::deleteImages( int fromIndex, int toIndex )
+void MainWindow::deleteImages( int fromIndex, int numImages )
 {
-    for ( int i = fromIndex; i <= toIndex; ++ i )
-    {
-        QString toRemove = getImageFilePath( i + 1 );
-        qDebug() << "Removing: " << toRemove;
-        QFile::remove( toRemove );
-    }
-
-    for ( int i = fromIndex; i <= toIndex; ++ i )
-    {
-        QListWidgetItem *removed = ui->_imageIconList->takeItem( fromIndex );
-        delete removed;
-    }
+    moveBack( fromIndex, numImages );
 }
 
 void MainWindow::reArrangeFiles()
@@ -266,7 +255,7 @@ void MainWindow::reArrangeFiles()
         auto shouldBe = getImageFilePath( i + 1 );
         auto current = QDir( _workingDir ).absoluteFilePath( allImages[i] );
         if ( shouldBe != current )
-            QFile::rename( current, shouldBe );
+            moveFile( current, shouldBe );
     }
     fillImageList();
 }
@@ -300,12 +289,33 @@ void MainWindow::createGap( int startIndex, int numImages )
         QString oldName = getImageFilePath( i + 1 );
         int newIndex = i + numImages;
         QString newName = getImageFilePath( newIndex + 1 );
-        QFile::rename( oldName, newName );
+        moveFile( oldName, newName );
         if ( newIndex > lastIndex )
-            new QListWidgetItem( QIcon( newName ), QString(), ui->_imageIconList );
+        {
+            ui->_imageIconList->insertItem( lastIndex + 1, new QListWidgetItem( QIcon( newName ), QString() ) );
+        }
         else
             ui->_imageIconList->item( newIndex )->setIcon( QIcon( newName ) );
     }
+}
+
+void MainWindow::moveBack( int startIndex, int gap )
+{
+    int lastIndex = getNumFiles() - 1;
+    for ( int i = startIndex + gap; i <= lastIndex + gap; ++ i)
+    {
+        int toIndex = i - gap;
+        QString toName = getImageFilePath( toIndex + 1 );
+        int fromIndex = i;
+        QString fromName = getImageFilePath( fromIndex + 1 );
+        if ( QFile::exists( fromName ) )
+            moveFile( fromName, toName );
+        else
+            QFile::remove( toName );
+    }
+    //remove entries from view
+    for ( int i = startIndex; i < startIndex + gap; ++ i )
+        delete ui->_imageIconList->takeItem( startIndex );
 }
 
 void MainWindow::copyImages( int startIndex )
@@ -315,7 +325,7 @@ void MainWindow::copyImages( int startIndex )
     {
         QString fromName = getImageFilePath( index.row() + 1 );
         QString toName = getTempImageFilePath( currentIndex + 2 );
-        QFile::copy( fromName, toName );
+        copyFile( fromName, toName );
         ++ currentIndex;
     }
 }
@@ -329,7 +339,7 @@ void MainWindow::insertImages( int startIndex, int numImages )
         int index = i + startIndex + 1;
         QString fromName = getTempImageFilePath( index + 1 );
         QString toName = getImageFilePath( index + 1 );
-        QFile::rename( fromName, toName );
+        moveFile( fromName, toName );
         if ( index > lastIndex )
             new QListWidgetItem( QIcon( toName ), QString(), ui->_imageIconList );
         else
@@ -344,4 +354,18 @@ void MainWindow::on__pasteImage_clicked()
     copyImages( where );
     createGap( where, numImages );
     insertImages( where, numImages );
+}
+
+bool MainWindow::moveFile( const QString &from, const QString &to )
+{
+    if ( QFile::exists( to ) )
+        QFile::remove( to );
+    return QFile::rename( from, to );
+}
+
+bool MainWindow::copyFile( const QString &from, const QString &to )
+{
+    if ( QFile::exists( to ) )
+        QFile::remove( to );
+    return QFile::copy( from, to );
 }
