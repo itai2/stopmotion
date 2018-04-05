@@ -10,6 +10,7 @@
 #include <QSpinBox>
 #include <QToolButton>
 #include <QVBoxLayout>
+#include <math.h>
 
 #define V4L2_CTRL_ID2WHICH(id)    ((id) & 0x0fff0000UL)
 
